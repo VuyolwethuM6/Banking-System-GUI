@@ -1,9 +1,7 @@
 from CTkMessagebox import CTkMessagebox
 from time import gmtime, strftime
-# from tkinter import messagebox
 import customtkinter as ctk
 from PIL import Image
-# import sqlite3
 import random
 
 
@@ -38,7 +36,7 @@ def home_return(master):
 # Create user files
 def write(master, name, oc, pin):
     # Validate the user input
-    if (is_number(name)) or (is_number(oc) == 0) or (is_number(pin) == 0) or name == "":
+    if (is_number(name)) or (is_number(oc) == 0) or name == "":
         CTkMessagebox(title="Error", message="Invalid Credentials\nPlease try again.", icon="warning")
         master.destroy()
         return
@@ -309,7 +307,6 @@ def check_log_in(master, account_num, pin):
         logged_in_menu(account_num)
 
 
-# Login Window
 def log_in(master):
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("blue")
@@ -317,32 +314,33 @@ def log_in(master):
     master.destroy()
 
     login_wind = ctk.CTkToplevel()
-    login_wind.geometry("500x680")
+    login_wind.geometry("500x500")
     login_wind.title("Log in")
 
     # Title/Heading
-    l_title = ctk.CTkLabel(master=login_wind, text="CodeX   Banking   System", font=('Times New Roman Bold', 20))
-    l_title.pack(pady=20)
+    l_title = ctk.CTkLabel(master=login_wind, text="CodeX Banking System", font=('Times New Roman Bold', 20))
+    l_title.grid(row=0, column=0, columnspan=3, pady=20)
 
     # Image frame
     icon = ctk.CTkImage(dark_image=Image.open("Images/login.png"), size=(250, 200))
-    disply_icon = ctk.CTkLabel(login_wind, image=icon, text='').pack(padx=20, pady=20)
+    disply_icon = ctk.CTkLabel(login_wind, image=icon, text='')
+    disply_icon.grid(row=1, column=0, columnspan=3, pady=20)
 
     # Details Frame
     frame = ctk.CTkFrame(master=login_wind)
-    frame.pack(pady=20, padx=40, fill='both', expand=False)
+    frame.grid(row=2, column=0, columnspan=3, pady=20)
 
     # Enter Account number
     l2 = ctk.CTkLabel(frame, text="Enter account number:")
-    l2.pack(side="top")
+    l2.grid(row=0, column=0, padx=10, sticky="e")
     e2 = ctk.CTkEntry(frame)
-    e2.pack(pady=12, padx=10)
+    e2.grid(row=0, column=1, pady=12, padx=10)
 
     # Enter Account Pin
     l3 = ctk.CTkLabel(frame, text="Enter your PIN:")
-    l3.pack(side="top")
+    l3.grid(row=1, column=0, padx=10, sticky="e")
     e3 = ctk.CTkEntry(frame, show="*")
-    e3.pack(pady=12, padx=10)
+    e3.grid(row=1, column=1, pady=12, padx=10)
 
     # Show and Hide Pin
     def show_and_hide():
@@ -353,16 +351,56 @@ def log_in(master):
 
     pin_checkbox = ctk.CTkCheckBox(frame, text="Show Password", fg_color='red', font=('verdana', 11),
                                    command=show_and_hide)
-    pin_checkbox.pack(pady=12, padx=10)
+    pin_checkbox.grid(row=1, column=2, pady=12, padx=10, sticky="w")
 
-    # login Button
+    # Login Button
     b = ctk.CTkButton(frame, text="Submit", command=lambda: check_log_in(login_wind, e2.get().strip(), e3.get().strip()))
-    b.pack(pady=12, padx=10)
+    b.grid(row=2, column=0, pady=12, padx=10, sticky="e")
+
+    # Forgot Password Button
+    forgot_button = ctk.CTkButton(frame, text="Forgot Password", command=lambda: forgot_password(login_wind))
+    forgot_button.grid(row=2, column=1, pady=12, padx=10)
 
     # Back Button
-    b1 = ctk.CTkButton(login_wind, text="Back", command=lambda: home_return(login_wind))
-    b1.pack(pady=12, padx=10)
+    b1 = ctk.CTkButton(frame, text="Back", command=lambda: home_return(login_wind))
+    b1.grid(row=2, column=2, pady=12, padx=10, sticky="w")
     login_wind.bind("<Return>", lambda x: check_log_in(login_wind, e2.get().strip(), e3.get().strip()))
+
+
+def reset_pass(master, passw):
+    print(passw)
+    
+    
+# Add this function for handling forgotten passwords
+def forgot_password(master):
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("blue")
+
+    forgotPassword_wind = ctk.CTkToplevel()
+    forgotPassword_wind.geometry("200x200")
+    forgotPassword_wind.title("Forgot Password")
+    
+    l1 = ctk.CTkLabel(forgotPassword_wind, text="Enter Account number: ")
+    e1 = ctk.CTkEntry(forgotPassword_wind)
+    l1.grid(row=0, column=0, padx=10, pady= 10, sticky="e")
+    e1.grid(row=0, column=1, padx=10, pady= 10, sticky="e")
+
+    l2 = ctk.CTkLabel(forgotPassword_wind, text="Enter New Password: ")
+    e2 = ctk.CTkEntry(forgotPassword_wind)
+    l2.grid(row=1, column=0, padx=1, pady= 10, sticky="e")
+    e2.grid(row=1, column=1, padx=10, pady= 10, sticky="e")
+    
+    l3 = ctk.CTkLabel(forgotPassword_wind, text="Connfirm New Password: ")
+    e3 = ctk.CTkEntry(forgotPassword_wind)
+    l3.grid(row=2, column=0, padx=10, pady= 10, sticky="e")
+    e3.grid(row=2, column=1, padx=10, pady= 10, sticky="e")
+    
+    reset_button = ctk.CTkButton(forgotPassword_wind, text="Reset", command=lambda: reset_pass(forgotPassword_wind, e2))
+    reset_button.grid(row=3, column=1, padx=10, pady= 10, sticky="e")
+    forgotPassword_wind.bind("<Return>", lambda x: reset_pass(forgotPassword_wind, e2))
+
+    # Implement the logic for forgotten passwords here
+    #CTkMessagebox(title="Forgot Password", message="Sorry, this feature is not implemented yet.", icon="info")
 
 
 # Register a new user window
@@ -399,16 +437,35 @@ def signup():
     e2.grid(row=1, column=1, pady=12, padx=10)
 
     # Display and Generate PIN
-    generated_pin_label = ctk.CTkLabel(frame, text="Generated PIN:")
+    generated_pin_label = ctk.CTkLabel(frame, text="Generated Password:")
     generated_pin_label.grid(row=2, column=0, pady=12, padx=10)
 
     e3 = ctk.CTkEntry(frame, show="*")
     e3.grid(row=2, column=1, pady=12, padx=10)
     
     def generate_pin():
-        random_pin = str(random.randint(1000, 9999))
+        
+        # Initializing our character values
+        lowerCase = "abcdefghijklmnopqrstuvwxyz"
+        upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        numbers = "0123456789"
+        symbols = "!@#$%^&*()."
+
+        # The string variable is created by concatenating all these character sets
+        string = lowerCase + upperCase + numbers + symbols
+
+        # The length variable specifies the desired length of the password.
+        length = 16
+
+        # Randomly shuffle the characters in the string
+        shuffled_string = ''.join(random.sample(string, len(string)))
+
+        # Randomly select length number of characters from the shuffled string
+        password = ''.join(random.sample(shuffled_string, length))
+        
+        # random_pin = str(random.randint(1000, 9999))
         e3.delete(0, 'end')  # Clear any existing PIN in the entry field
-        e3.insert(0, random_pin)  # Insert the generated PIN into the entry field
+        e3.insert(0, password)  # Insert the generated PIN into the entry field
 
     # Show and Hide Pin
     def show_and_hide():
@@ -424,7 +481,7 @@ def signup():
     pin_checkbox.grid(row=4, column=0, pady=12, padx=10)
 
     # Generate PIN Button
-    generate_pin_button = ctk.CTkButton(frame, text="Generate PIN", command=generate_pin)
+    generate_pin_button = ctk.CTkButton(frame, text="Generate Password", command=generate_pin)
     generate_pin_button.grid(row=4, column=1, pady=12, padx=10)
 
     # Sign up Button
