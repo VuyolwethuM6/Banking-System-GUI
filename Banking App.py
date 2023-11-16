@@ -3,6 +3,8 @@ from time import gmtime, strftime
 import customtkinter as ctk
 from PIL import Image
 import random
+import hashlib
+import json
 
 
 # Check if input is numeric
@@ -367,8 +369,72 @@ def log_in(master):
     login_wind.bind("<Return>", lambda x: check_log_in(login_wind, e2.get().strip(), e3.get().strip()))
 
 
+USER_DATA_FILE = 'user_data.txt'
+
+def load_user_data():
+    try:
+        with open(USER_DATA_FILE, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+ 
+def save_user_data(user_data):
+    with open(USER_DATA_FILE, 'w') as file:
+        json.dump(user_data, file, indent=2)
+
+
+def register_user(username, amount, gen_password, security_question, security_answer):
+        user_data = load_user_data()
+        # Hash the password before storing
+        hashed_password = hashlib.sha256(gen_password.encode()).hexdigest()
+        # Store user data
+        user_data[username] = {
+            'username': username,
+            'amount' : amount,
+            'password': hashed_password,
+            'security_question': security_question,
+            'security_answer': hashlib.sha256(security_answer.encode()).hexdigest()
+        }
+        
+        # Save updated user data to the file
+        save_user_data(user_data)
+        
+def recover_password(username, security_answer, new_password):
+    user_data = load_user_data()
+ 
+    if username in user_data:
+        # Verify the security answer
+        hashed_answer = hashlib.sha256(security_answer.encode()).hexdigest()
+        if hashed_answer == user_data[username]['security_answer']:
+            # Update the password
+            user_data[username]['password'] = hashlib.sha256(new_password.encode()).hexdigest()
+            print("Password recovery successful!")
+ 
+            # Save updated user data to the file
+            save_user_data(user_data)
+        else:
+            print("Incorrect security answer.\n")
+    else:
+        print("User not found.\n")
+        
+def login(username, password):
+    user_data = load_user_data()
+ 
+    if username in user_data:
+        # Verify the password
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        if hashed_password == user_data[username]['password']:
+            print("Login successful!\n")
+            return True
+        else:
+            print("Incorrect password.\n")
+            return False
+    else:
+        print("User not found.")
+        return False
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def reset_pass(master, passw):
-    print(passw)
+    CTkMessagebox(title="Reset Password", message="Sorry, this feature is not implemented yet.", icon="info")
     
     
 # Add this function for handling forgotten passwords
@@ -377,7 +443,7 @@ def forgot_password(master):
     ctk.set_default_color_theme("blue")
 
     forgotPassword_wind = ctk.CTkToplevel()
-    forgotPassword_wind.geometry("200x200")
+    forgotPassword_wind.geometry("400x200")
     forgotPassword_wind.title("Forgot Password")
     
     l1 = ctk.CTkLabel(forgotPassword_wind, text="Enter Account number: ")
@@ -422,7 +488,7 @@ def signup():
 
     # Details Frame
     frame = ctk.CTkFrame(master=signup_wind)
-    frame.pack(pady=20, padx=40, fill='both', expand=False)
+    frame.pack(pady=10, padx=40, fill='both', expand=True)
 
     # Enter Name
     l1 = ctk.CTkLabel(frame, text="Enter Name:")
@@ -442,6 +508,14 @@ def signup():
 
     e3 = ctk.CTkEntry(frame, show="*")
     e3.grid(row=2, column=1, pady=12, padx=10)
+    
+    # Enter the security question
+    l4 = ctk.CTkLabel(frame, text="Security question*")
+    l5 = ctk.CTkLabel(frame, text="What is your pet\'s name?:")
+    l4.grid(row=3, column=0, pady=12, padx=10)
+    l5.grid(row=3, column=0, pady=12, padx=10)
+    e4 = ctk.CTkEntry(frame)
+    e4.grid(row=3, column=1, pady=12, padx=10)
     
     def generate_pin():
         
@@ -480,6 +554,7 @@ def signup():
                                 command=show_and_hide)
     pin_checkbox.grid(row=4, column=0, pady=12, padx=10)
 
+    
     # Generate PIN Button
     generate_pin_button = ctk.CTkButton(frame, text="Generate Password", command=generate_pin)
     generate_pin_button.grid(row=4, column=1, pady=12, padx=10)
@@ -492,6 +567,8 @@ def signup():
     b1 = ctk.CTkButton(signup_wind, text="Back", command=signup_wind.destroy)
     b1.grid(row=5, column=2, pady=12, padx=10)
 
+    #
+    register_user(e1, e2, e3, 'What is your pet\'s name?:', e4)
     signup_wind.bind("<Return>", lambda x: write(signup_wind, e1.get().strip(), e2.get().strip(), e3.get().strip()))
     return
 
@@ -529,11 +606,3 @@ def Main_Menu():
 
 
 Main_Menu()
-
-
-'''
-  Validate all user inputs
-  Forgot password button & logic
-  Connect to database
-  - Invest button
-'''
